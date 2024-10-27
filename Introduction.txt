@@ -3,7 +3,7 @@ create backend and fronted
 npm init -y //adds package.json
 add "type": "module" to file (line 5)
 
-add express packagse using 
+add express package using 
 npm i express nodemon
 (nodemon) to reastart server
 
