@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
+import { FloatingNav } from "@/components/floating-navbar";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
@@ -16,7 +19,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Navbar/>
+        {/* <FloatingNav name="Home" link="/home" icon="null" /> */}
+        {children}
+        <Footer/>
+      </body>
     </html>
   );
 }
