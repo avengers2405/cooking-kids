@@ -3,35 +3,117 @@
 import Image from "next/image";
 import DropdownMenu from "@/components/dropdownMenu";
 import { useState, useEffect } from "react";
+import {Button} from 'antd';
+import axios from 'axios';
+import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { TrendingUp } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart"
+
+import '../globals.css';
+import { platform } from "os";
+
+type ProblemRecord = {
+  problemId: string;
+  date: Date;
+  handle: string;
+  lang: string;
+};
 
 export default function Home() {
 
-  const [ data, setData ] = useState<{platform: Number; username: String|null}>({ platform:-1, username:null });
-  const [ dataGraph, setDataGraph ] = useState(0);
+  const [ data, setData ] = useState<{platform: Number; username: string|null}>({ platform:-1, username:null });
+  const [ displayGraphComponenent, setDisplayGraphComponent ] = useState(0);
+  const [ graphData, setGraphData ] = useState<any[]>([]);
 
   useEffect(()=>{
     console.log("called ", data.platform);
     if (data.platform==-1) return;
     else{
-      // api call to get data
-      // store data
-      // display data
-      console.log("username recieved: ", data.username);
-      setDataGraph(1);
+      console.log("called for username: ", data.username);
+
+      const submissionByDate = new Map<String, number>();
+      showGraph(data).then((acSubmissions)=>{
+        let minDate: Date = new Date();
+        Object.entries(acSubmissions.data).map((entry:any)=>{
+          minDate = (minDate>(new Date(entry[1].date.substring(0, 10))))?(new Date(entry[1].date.substring(0, 10))):minDate;
+        })
+        for (; minDate<new Date(); minDate.setDate(minDate.getDate()+1)){
+          submissionByDate.set(String(minDate), 0);
+        }
+        Object.entries(acSubmissions.data).map((entry:any)=>{
+          submissionByDate.set(String(new Date(entry[1].date.substring(0, 10))), (submissionByDate.get(String(new Date(entry[1].date.substring(0, 10))))??0)+1);
+        })
+
+        let sm=0 as number;
+        let tempGraphData:any[]=[];
+        submissionByDate.forEach((value, key)=>{
+          sm+=value;
+          tempGraphData.push({
+            date:key,
+            desktop:sm
+          });
+        });
+        console.log(tempGraphData)
+        setGraphData(tempGraphData);
+        setDisplayGraphComponent(1);
+        
+      })
     }
   }, [data]);
+
+  async function showGraph(data: {platform: Number, username: string|null}){
+    console.log('asking for data');
+    return await axios.post('http://localhost:5555/problem-solved', data);
+  }
 
   const displayGraph = (platform: number, username: string | null) => {
     setData({ platform, username });
   };
 
+  const pingServer=async ()=>{
+    try{
+      const res = await axios.get('http://localhost:5555/');
+      console.log('Pinged server: ', res);
+    } catch (error){
+      console.log('Could not ping server: ', error);  
+    }
+    
+  }
 
-  // const recieveData= (data)=>{
-  //   setData({ platform });
-  // }
+  const chartConfig = {
+    desktop: {
+      label: "Desktop",
+      color: "hsl(var(--chart-1))",
+    },
+  } satisfies ChartConfig
+
+  const chartData = [
+    { month: "January", desktop: 186 },
+    { month: "February", desktop: 305 },
+    { month: "March", desktop: 237 },
+    { month: "April", desktop: 73 },
+    { month: "May", desktop: 209 },
+    { month: "June", desktop: 214 },
+  ]
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <Button color="default" variant="filled" onClick={pingServer}>
+        Ping Server !
+      </Button>
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
         <div className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
           &nbsp;
@@ -56,12 +138,56 @@ export default function Home() {
           </a>
         </div>
       </div>
+      {<br/>}
+      
 
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        { (dataGraph)?
-          <div> 
-            Your data will be visible here
-          </div>
+        { (displayGraphComponenent)?
+          <Card>
+          <CardHeader>
+            <CardTitle>Line Chart</CardTitle>
+            <CardDescription>-------------------------------{graphData[0].date.slice(4, 8)+graphData[0].date.slice(13, 16)} - {graphData.slice(-1)[0].date.slice(4, 8)+graphData.slice(-1)[0].date.slice(13, 16)}------------------------------</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={chartConfig}>
+              <LineChart
+                accessibilityLayer
+                data={graphData}
+                margin={{
+                  left: 12,
+                  right: 12,
+                }}
+              >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tickLine={true}
+                  axisLine={true}
+                  tickMargin={8}
+                  tickFormatter={(value) => value.slice(4, 8) + value.slice(13, 15)}
+                />
+                <ChartTooltip
+                  cursor={true}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                <Line
+                  dataKey="desktop"
+                  type="natural"
+                  stroke="var(--color-desktop)"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </LineChart>
+            </ChartContainer>
+          </CardContent>
+          <CardFooter className="flex-col items-start gap-2 text-sm">
+            <div className="flex gap-2 font-medium leading-none">
+              Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+            </div>
+            <div className="leading-none text-muted-foreground">
+              Showing total visitors for the last 6 months
+            </div>
+          </CardFooter>
+        </Card>
           :
           <Image
             className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
@@ -72,7 +198,6 @@ export default function Home() {
             priority
           />
         }
-      </div>
 
       <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
         <a

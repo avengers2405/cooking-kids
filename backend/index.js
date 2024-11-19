@@ -1,159 +1,200 @@
 // start of our project
 
-import express from "express"; //we need express.js so import it
-import {PORT, mongoDBURL} from "./config.js"; //importing from config.js
-//importing as many exports as we want seperated by comma
-import mongoose from 'mongoose';
-// import {userData} from './models/model0.js';
+import express from "express";
+import {PORT, mongoDBURL} from "./config.js";
+// import mongoose from 'mongoose';
+import axios from 'axios';
+
 import routesBasic from './routes/routesBasic.js';
 import cors from "cors";
-// const routesBasic = require('./routes/routesBasic.js');
+
 const app = express();
 
-//for parsing data, or requests wont work
+app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}/`);
+});
+
 app.use(express.json());
 
-app.use('/record', routesBasic);
+app.use(cors());
 
-app.use(cors({
-    origin: "http://localhost:3000",
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type'],
-})); 
-// leave cors() empty to allow all websites all methods
-// this is custom origin
+app.get('/', (request, response)=>{
+    console.log("get at '/'.");
+    // console.log(request);
+    // console.log(response);
+    return response.status(200).send("Yay!");
+})
 
-//make it listen to a port
-//we seperate code into diff files and folders.
-//so diff files for things (idk why the shit tho fuck js for the sake of my life)
+app.post('/problem-solved', async (request, response)=>{
+    // console.log(request.headers);
 
-// creating a function to listen to the port
+    //leetcode
+    if (request.body.platform==1){
+        // query lc api
+        // let config = {
+        //     method: 'get',
+        //     maxBodyLength: Infinity,
+        //     url: 'https://leetcode.com/',
+        //     headers: { }
+        // };
+        try{
+            const res = await axios.get('https://leetcode.com/', {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
+                    'Accept': '*/*',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    // 'Referer': 'https://leetcode.com/',
+                    'Connection': 'keep-alive',
+                    // 'Upgrade-Insecure-Requests': '1',
+                    // 'DNT': '1', // Do Not Track header
+                    'Cache-Control': 'no-cache',
+                    // 'Pragma': 'no-cache'
+                }
+            });
+            console.log(res);
+        } catch(error){
+            console.log(error.message);
+            console.log("byrrr");
+        }       
+        console.log("done"); 
+        // axios.request(config)
+        // .then((response) => {
+        //     console.log(JSON.stringify(response.data));
+        // })
+        // .catch((error) => {
+        //     console.log(error);
+        //     console.log("bye");
+        // });
+        // const res = await axios.get('https://leetcode.com/', {headers: {
 
-app.listen(PORT, () => {
-    console.log(`App is listening to port: ${PORT}`);
-});  
+        // }}); //make get request to get cookies
+        // console.log(res);
 
-// till here, we will get cannot get '/'
-// this is bcz default route to server is '/', and we have not yet handled it
-// so we will make it
+        // const data = {
+        //     query: `{
+        //         matchedUser(username: "${request.body.username}"){
+        //             username
+        //             submitStats: submitStatsGlobal {
+        //                 acSubmissionNum {
+        //                     difficulty
+        //                     count
+        //                     submissions
+        //                 }
+        //             }
+        //         }
+        //     }`,
+        //     variables: {}
+        // };
 
-// app.get('/', (request, response)=> {
-//     console.log(request);
-//     console.log(response);
-//     //we can send 1) status msg 2) msg with thte response, as follows
-//     return response.status(244).send('Full stack journey !!');
-// }); //get is method used to get resource from server, other methods also exist
-// // the first param is string for route, the second param is callback function that handles the request
+        // try{
+        //     const lcres = await axios.post('https://leetcode.com/graphql', 
+        //         data,
+        //         {headers: { 
+        //             'Content-Type': 'application/json'
+        //         }},
+        //     );
+        //     console.log('Result: ', lcres.data);
+        // } catch (error){
+        //     console.log(error);
+        // }
 
-// to store a new book, we generally use post method
-// get request doesnt have a body. it's url params go to 
-// 'query', so access usingthat somehow not body.
-// this is post bcz data is wanted to be secure.
-// app.post('/record', async (request, response) => { //async can be used bcz post methods are asynchronous
-//     try{
-//         console.log(request);
-//         console.log(request.body);
-//         //check if all fields are filled for the book data that needs to be entered
-//         // console.log("Pre processing");
-//         if (!request.body.name || !request.body.rating || !request.body.rank || !request.body.problemsSolved){
-//             // console.log("Pre processing1.1");
-//             return response.status(400).send({ message: "Send all required fields!"});
-//         } else {
-//             // console.log("Pre processing2.1");
-//             const newUser = {
-//                 name: request.body.name,
-//                 rating: request.body.rating,
-//                 rank: request.body.rank,
-//                 problemsSolved: request.body.problemsSolved,
-//             };
-//             const user0 = await userData.create(newUser);
-//             console.log(`here, ${user0}`);
-//             return response.status(201).send(user0);
-//         }
-//     }catch (error) { //here async is used for asynchronous operation so try-catch block is used
-//         // console.log("Pre processing3.1");
-//         console.log(error.message);
-//         response.status(500).send({message: error.message});
-//     }
-// });
+        // console.log("NEXT REQUEST \n\n");
 
-// //getting records from db
-// app.get('/record', async (request, response) => {
-//     try{
-//         const users = await userData.find({});
-//         return response.status(200).json({
-//             count: users.length,
-//             data: users
-//         });  //json format return, count key and data, defined by us completely
-//     }catch{
-//         console.log(error.message);
-//         response.status('500').send({message: error.message});
-//     }
-// });
+        // const data2 = {
 
-// //getting record by id
-// // since this is a get request, info is sent and recieved through url
-// // id is sent as /record/<id>
-// // app.get('/record/:id', async (request, response) => {
-// //     try{
-// //         const {id} = request.params;
-// //         const users = await userData.findById(id);
-// //         return response.status(200).json({
-// //             count: users.length,
-// //             data: users
-// //         });  //json format return, count key and data, defined by us completely
-// //     }catch{
-// //         console.log(error.message);
-// //         response.status('500').send({message: error.message});
-// //     }
-// // });
+        //     query: `{
+        //         matchedUser(username: "${request.body.username}"){
+        //             contributions{
+        //                 points
+        //             }
+        //             profile {
+        //                 reputation
+        //                 ranking
+        //             }
+        //             submissionCalendar
+        //             username
+        //             submitStats: submitStatsGlobal {
+        //                 acSubmissionNum {
+        //                     difficulty
+        //                     count
+        //                     submissions
+        //                 }
+        //             }
+        //         }
+        //     }`,
+        //     variables: {}
+        // };
+        // console.log(data2.length);
+        // try {
+        //     const lc_res = await axios.post('https://leetcode.com/graphql', 
+        //         data2,
+        //         {headers: {
+        //             'Content-Type': 'application/json'
+        //         }}
+        //     );
+        //     console.log("leetcode response: ", lc_res.data);
+        // } catch (error) {
+        //     console.log(error);
+        // }
+        
+        // console.log("here in lc");
+    }
 
-// //to update a user
-// app.put('/record/:id', async (request, response) => {
-//     try{
-//         const {id} = request.params;
-//         const users = await userData.findByIdAndUpdate(id, request.body);
-//         return response.status(200).json({
-//             count: users.length,
-//             data: users
-//         });  //json format return, count key and data, defined by us completely
-//     }catch{
-//         console.log(error.message);
-//         response.status('500').send({message: error.message});
-//     }
-// });
+    // codeforces
+    if (request.body.platform==2){
+        // query cf api 
+        // https://codeforces.com/api/user.status?handle=Fefer_Ivan&from=1&count=10
+        // let itr =10;
+        try{
+            const res = await axios.get(`https://codeforces.com`);
+            console.log(res);
+        } catch( error ){
+            console.log(error.message);
+        }
+        try{
+            let i=1
+            let res;
+            const acSubmissions = [];
+            do {
+                res = await axios.get(`https://codeforces.com/api/user.status?handle=${request.body.username}&from=${i}&count=100`);
+                i+=100;
+                res.data.result.forEach((record) => {
+                    if (record.verdict!="OK") return;
+                    acSubmissions.push({
+                        "problemId": record.problem.contestId+record.problem.index,
+                        "date": new Date(record.creationTimeSeconds*1000),
+                        "handle": record.author.members[0].handle,
+                        "lang": record.programmingLanguage
+                    });
+                    return;
+                });
+                // console.log(res.data, res.data.result.length);
+            } while (res.data.result.length) //console.log("recieved data: ", acSubmissions);
 
-// //to delete a record by id
-// app.delete('/record/:id', async (request, response) => {
-//     try{
-//         const {id} = request.params;
-//         const users = await userData.findByIdAndDelete(id);
-//         return response.status(200).json({
-//             count: users.length,
-//             data: users
-//         });  //json format return, count key and data, defined by us completely
-//     }catch{
-//         console.log(error.message);
-//         response.status('500').send({message: error.message});
-//     }
-// });
+            return response.status(200).send(acSubmissions);
+        } catch (error){
+            console.log(error.message);
+        }
+        // axiosInstance.interceptors.response.use(res => {
+        //     console.log(res.request._header)
+        //     return res;
+        // }, error => Promise.reject(error));
+    }
+    return response.status(200).send('ok sent response, unreachable.');
+})
 
-// difference between try-catch and then-catch
-// try catch wont work for asynchronous, so we need to use await to make it semantically similar to synchronous methods
-// it has sth to do with promises
-// whereas a then-catch is used to catch exceptions from asynchronous operation.
-// bcz try-catch wont be able to catch async operation exceptions that arent awaited
-
-mongoose.connect(mongoDBURL) //connects to DB
-        .then(() => {        //try - catch block type, then-catch block
-            console.log("App connected to DB successfully");
-            app.get('/', (request, response)=> {
-                console.log(request);
-                console.log(response);
-                return response.status(244).send('Full stack journey !!');
-            }); //port connection placed here since we want to connect only if db connects
+// mongoose.connect(mongoDBURL) //connects to DB
+//         .then(() => {        //try - catch block type, then-catch block
+//             console.log("App connected to DB successfully");
+//             app.get('/', (request, response)=> {
+//                 console.log(request);
+//                 console.log(response);
+//                 return response.status(244).send('Full stack journey !!');
+//             }); //port connection placed here since we want to connect only if db connects
             
-        })
-        .catch((error) => {
-            console.log(error);
-        })
+//         })
+//         .catch((error) => {
+//             console.log(error);
+//         })
+// console.log("ready");
