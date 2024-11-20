@@ -184,6 +184,10 @@ app.post('/problem-solved', async (request, response)=>{
     return response.status(200).send('ok sent response, unreachable.');
 })
 
+app.post('/signup', async(request, response)=>{
+    
+})
+
 // mongoose.connect(mongoDBURL) //connects to DB
 //         .then(() => {        //try - catch block type, then-catch block
 //             console.log("App connected to DB successfully");
