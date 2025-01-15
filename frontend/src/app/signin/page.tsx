@@ -15,27 +15,20 @@ import { useRouter } from "next/navigation";
 export default function SignupFormDemo() {
   const { push } = useRouter();
 
-  const [ fName, setFName ] = useState<String|undefined>(undefined);
-  const [ lName, setLName ] = useState<String|undefined>(undefined);
-  const [ email, setEmail ] = useState<String|undefined>(undefined);
   const [ username, setUsername ] = useState<String|undefined>(undefined);
   const [ password, setPassword ] = useState<String|undefined>(undefined);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try{
-      console.log("email: ", email);
+      // console.log("email: ", email);
       const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/signup`, {
-        "fName": fName,
-        "lName": lName,
-        "email": email,
         "username": username,
         "password": password
       });
       // console.log("here: ", response.status);
       if (response.status==200){
         console.log('response data: ', response.data);
-        console.log("token recieved: ", response.headers);
         push('/home');
       } 
       // console.log("Form submitted");
@@ -45,13 +38,13 @@ export default function SignupFormDemo() {
     }
   };
   return (
-    <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black mt-2 mb-2">
+    <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black mt-5 mb-5">
       <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
         Welcome to CodeWiser
       </h2>
 
       <form className="my-8" onSubmit={handleSubmit}>
-        <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
+        {/* <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
           <LabelInputContainer>
             <Label htmlFor="firstname">First name</Label>
             <Input onChange={(event)=>{setFName(event.target.value)}} id="firstname" placeholder="Michael" type="text" />
@@ -60,11 +53,11 @@ export default function SignupFormDemo() {
             <Label htmlFor="lastname">Last name</Label>
             <Input onChange={(event)=>{setLName(event.target.value)}} id="lastname" placeholder="Jordan" type="text" />
           </LabelInputContainer>
-        </div>
-        <LabelInputContainer className="mb-4">
+        </div> */}
+        {/* <LabelInputContainer className="mb-4">
           <Label htmlFor="email">Email Address</Label>
           <Input onChange={(event)=>{setEmail(event.target.value)}} id="email" placeholder="thegoat@basketball.com" type="email" />
-        </LabelInputContainer>
+        </LabelInputContainer> */}
         <LabelInputContainer className="mb-4">
           <Label htmlFor="username">Username</Label>
           <Input onChange={(event)=>{setUsername(event?.target.value)}} id="username" placeholder="MJ23" type="text" />
@@ -83,7 +76,7 @@ export default function SignupFormDemo() {
           //   })
           // }}
         >
-          Sign up &rarr;
+          Sign In &rarr;
           <BottomGradient />
         </button>
 

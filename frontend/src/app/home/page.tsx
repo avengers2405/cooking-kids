@@ -75,8 +75,8 @@ export default function Home() {
   }, [data]);
 
   async function showGraph(data: {platform: Number, username: string|null}){
-    console.log('asking for data');
-    return await axios.post('http://localhost:5555/problem-solved', data);
+    console.log('asking for data: ', data);
+    return await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/problem-solved`, data);
   }
 
   const displayGraph = (platform: number, username: string | null) => {
@@ -85,7 +85,7 @@ export default function Home() {
 
   const pingServer=async ()=>{
     try{
-      const res = await axios.get('http://localhost:5555/');
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_SERVER_URL}/`);
       console.log('Pinged server: ', res);
     } catch (error){
       console.log('Could not ping server: ', error);  
